@@ -49,18 +49,18 @@ public class FileCreateLockSample {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         for (int i = 0; i < count; i++) {
             executorService.execute(() -> {
-                LOG.info("开启线程 {} ", Thread.currentThread());
+                LOG.info("开启线程 {}", Thread.currentThread());
                 try {
                     countDownLatch.await();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 if (isRunning.get() || !Files.exists(targetFile)) {
-                    LOG.info("线程 {} 进行文件访问，文件不存在", Thread.currentThread());
+                    LOG.info("进行文件访问，文件不存在");
                     main.readFile(targetFile);
                 }
                 try {
-                    LOG.info("线程 {} 已存在文件，读取文件操作，文件内容为 {}", Thread.currentThread(), new String(Files.readAllBytes(targetFile), StandardCharsets.UTF_8));
+                    LOG.info("已存在文件，读取文件操作，文件内容为 {}", new String(Files.readAllBytes(targetFile), StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -72,21 +72,21 @@ public class FileCreateLockSample {
 
     public void readFile(Path targetFile) {
 //        if (!isRunning.get()) {
-        LOG.info("线程 {} 准备获取锁", Thread.currentThread());
+        LOG.info("准备获取锁");
         LOCK.lock();
         try {
             // 准备创建文件
-            LOG.info("线程 {} 已获取锁", Thread.currentThread());
+            LOG.info("已获取锁");
             if (Files.exists(targetFile) && !isRunning.get()) {
-                LOG.info("线程 {} 拿锁后再次判断，文件存在，跳过生成", Thread.currentThread());
+                LOG.info("拿锁后再次判断，文件存在，跳过生成");
             } else {
                 isRunning.set(true);
-                LOG.info("线程 {} 开始创建文件!!!!!!!，isRunning = {} ", Thread.currentThread(), isRunning.get());
+                LOG.info("开始创建文件!!!!!!!，isRunning = {} ", isRunning.get());
                 Files.createFile(targetFile);
                 Files.write(targetFile, "you win".getBytes(StandardCharsets.UTF_8));
                 // 创建文件过程
 //                Thread.sleep(1000);
-                LOG.info("线程 {} 文件创建完成，保存位置为 {}", Thread.currentThread(), targetFile);
+                LOG.info("文件创建完成，保存位置为 {}", targetFile);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
